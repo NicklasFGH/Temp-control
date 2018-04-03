@@ -6,7 +6,7 @@ mintemp="27" #Temp where GPIO should shut off
 turnon="command" #insert command for turning on pins.
 turnoff="command" #insert command for turning off pins
 
-state="2"
+state="state"
 newtemp=$( cat $desttemp )
 
 #Function checks temperature and calls either shutOff or turnOn.
@@ -16,15 +16,14 @@ sleep $sleeptime
 
 echo "Checking temp"
 
-
-if [ "$newtemp" -lt "$mintemp" ]
-	state="1"
-        then shutOff
-elif [ "$mintemp" -lt "$newtemp" ]
-        state="2"
-	then turnOn
+if [ "$newtemp" -lt "$mintemp" ]; then
+        state="1"
+        shutOff
+elif [ "$mintemp" -lt "$newtemp" ]; then
+        state="0"
+        turnOn
 else
-	turnOn
+        turnOn
 fi
 
 }
@@ -34,20 +33,23 @@ shutOff (){
 
 
 while [ "$newtemp" -lt "$mintemp" ]; do
+
 newtemp=$( cat $desttemp )
-if [ $state = "0" ]
-	sleep $sleeptime
-        then  echo "Temperature is currently below $mintemp, pins are still turned off."
+
+if [ $state = "0" ]; then
+        sleep $sleeptime
+        echo "Temperature is currently below $mintemp, pins are still turned off."
         shutOff
-elif [ $state = "1" ]
-	then echo "Turning off pins"
-	#$turnoff
-	state="0"
-	shutOff
+elif [ $state = "1" ]; then
+        echo "Turning off pins"
+        #$turnoff
+        state="0"
+        shutOff
 fi
 done
 turnOn
 }
+
 
 #turns on pins while newtemp is higher than mintemp
 
@@ -55,18 +57,20 @@ turnOn (){
 
 sleep $sleeptime
 while [ "$mintemp" -lt "$newtemp" ]; do
+
 newtemp=$( cat $desttemp )
-if [ $state = "1" ]
-        then  echo "Temperature is currently above $mintemp, pins are still turned on."
+
+if [ $state = "1" ]; then
+        echo "Temperature is currently above $mintemp, pins are still turned on."
         turnOn
-elif [ $state = "0" ]
-        then echo "Turning on pins"
+elif [ $state = "0" ]; then
+        echo "Turning on pins"
         #$turnon
         state="1"
         turnOn
 fi
 done
-turnOff
+shutOff
 }
 
 
