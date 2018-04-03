@@ -1,0 +1,76 @@
+#!/bin/bash
+
+sleeptime="1" #Set seconds between every read
+desttemp="/home/temp.txt"  #Destination of temp file
+mintemp="27" #Temp where GPIO should shut off
+turnon="command" #insert command for turning on pins.
+turnoff="command" #insert command for turning off pins
+
+state="2"
+newtemp=$( cat $desttemp )
+
+#Function checks temperature and calls either shutOff or turnOn.
+checkTemp (){
+
+sleep $sleeptime
+
+echo "Checking temp"
+
+
+if [ "$newtemp" -lt "$mintemp" ]
+        then shutOff
+elif [ "$mintemp" -lt "$newtemp" ]
+        then turnOn
+else
+	turnOn
+fi
+
+}
+
+#Shuts off pins while newtemp is lower than mintemp
+shutOff (){
+
+sleep $sleeptime
+while [ "$newtemp" -lt "$mintemp" ]; do
+newtemp=$( cat $desttemp )
+if [ $state = "0" ]
+        then  echo "Temp still low enough"
+        shutOff
+elif [ $state = "1" ]
+	then echo "Turning off pins"
+	#$turnoff
+	state="0"
+	shutOff
+else
+	state="1"
+	shutOff
+fi
+done
+checkTemp
+}
+
+#turns on pins while newtemp is higher than mintemp
+
+turnOn (){
+
+sleep $sleeptime
+while [ "$mintemp" -lt "$newtemp" ]; do
+newtemp=$( cat $desttemp )
+if [ $state = "1" ]
+        then  echo "Temp still to high"
+        turnOn
+elif [ $state = "0" ]
+        then echo "Turning on pins"
+        #$turnon
+        state="1"
+        turnOn
+else
+        state="0"
+        turnOn
+fi
+done
+checkTemp
+}
+
+
+checkTemp
