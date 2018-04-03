@@ -42,7 +42,7 @@ if [ $state = "0" ]; then
         shutOff
 elif [ $state = "1" ]; then
         echo "Turning off pins"
-        #$turnoff
+        $turnoff
         state="0"
         shutOff
 fi
@@ -65,7 +65,7 @@ if [ $state = "1" ]; then
         turnOn
 elif [ $state = "0" ]; then
         echo "Turning on pins"
-        #$turnon
+        $turnon
         state="1"
         turnOn
 fi
